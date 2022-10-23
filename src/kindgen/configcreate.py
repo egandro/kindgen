@@ -121,7 +121,7 @@ class ClusterConfig:
         return self._cfg.get("internal_registry_name", "kind-registry")
 
     def internal_registry_port(self) -> int:
-        return self._cfg.getint("internal_registry_port", 5001)x
+        return self._cfg.getint("internal_registry_port", 5001)
 
     def ingress(self) -> bool:
         return self._cfg.getboolean("ingress", False)
