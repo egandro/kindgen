@@ -77,7 +77,7 @@ class Templates:
 
     def _render_template(self, cfg_data: dict[str, str], src_file: str, dest_file) -> None:
         # https://ttl255.com/jinja2-tutorial-part-1-introduction-and-variable-substitution/
-
+        # https://stackoverflow.com/questions/69056354/access-jinja2-templates-from-a-folder-outside-of-package
         src = Path(src_file).read_text()
 
         tmpl = Template(src)

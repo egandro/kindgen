@@ -1,7 +1,60 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+{% if internal_registry -%}
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:{{ internal_registry_port }}"]
+    endpoint = ["http://{{ internal_registry_name }}:5000"]
+{% endif -%}
 networking:
-  apiServerAddress: {{ api_server_address }}
+  apiServerAddress: "{{ api_server_address }}"
   #apiServerPort: 33333 # go with random port
 nodes:
+{% if worker_nodes < 1 -%}
+xxx {{ worker_nodes }}
+{% else -%}
+yyy {{ worker_nodes }}
+{% endif -%}
 - role: control-plane
+  extraMounts:
+  - hostPath: DATAPATH/data/controller
+    containerPath: /mnt/data
+  - hostPath: DATAPATH/data/shared
+    containerPath: /mnt/shared
+  # read about labels: https://kind.sigs.k8s.io/docs/user/configuration/
+  labels:
+    "my-label1": "true"
+- role: worker
+  labels:
+    "tier": "frontend"
+    "my-label2": "true"
+    "ingress-ready": "true" # used to pick this worker as public endpoint port node
+  # the first worker node gets the public port for ingress
+  # this needs to be moved to the control-plane, if you don' have workers
+  extraPortMappings:
+  # ingress
+  - containerPort: 80
+    hostPort: PUBLIC_HTTP_PORT
+  - containerPort: 443
+    hostPort: PUBLIC_HTTPS_PORT
+  extraMounts:
+  - hostPath: DATAPATH/data/worker1
+    containerPath: /mnt/data
+  - hostPath: DATAPATH/data/shared
+    containerPath: /mnt/shared
+- role: worker
+  labels:
+    "my-label3": "true"
+  extraMounts:
+  - hostPath: DATAPATH/data/worker2
+    containerPath: /mnt/data
+  - hostPath: DATAPATH/data/shared
+    containerPath: /mnt/shared
+- role: worker
+  labels:
+    "my-label4": "true"
+  extraMounts:
+  - hostPath: DATAPATH/data/worker3
+    containerPath: /mnt/data
+  - hostPath: DATAPATH/data/shared
+    containerPath: /mnt/shared

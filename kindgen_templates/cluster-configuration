@@ -1,5 +1,7 @@
 cluster_name=kind
 internal_registry=true
+internal_registry_name=kind-registry
+internal_registry_port=5001
 external_registry=false
 worker_nodes=3
 mountpoints=true
