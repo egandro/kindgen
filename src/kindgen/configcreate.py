@@ -31,7 +31,53 @@ class ConfigCreate:
             self._tpl.copy_file("kind-registry-connect.sh", "scripts", 0o0755)
             self._tpl.copy_file("kind-registry-create.sh", "scripts", 0o0755)
         if self._cfg.loadbalancer():
+            self._tpl.copy_file("metallb-config.tpl.yaml", "config")
             self._tpl.copy_file("update-metallb-ipaddresspool.sh", "scripts", 0o0755)
+        if self._cfg.copy_examples():
+            # kubernetes-dashboard
+            self._tpl.copy_file("apps/kubernetes-dashboard/admin-user.yaml", "apps/kubernetes-dashboard")
+            self._tpl.copy_file("apps/kubernetes-dashboard/role.yaml", "apps/kubernetes-dashboard")
+            self._tpl.copy_file("makefiles/app-kubernetes-dashboard.mk", "makefiles")
+            # k8sshell
+            self._tpl.copy_file("makefiles/app-k8sshell.mk", "makefiles")
+            if self._cfg.mountpoints():
+                # postgres
+                self._tpl.copy_file("apps/postgres/dummy-data.sql", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-configmap.yaml", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-deployment.yaml", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-pvc.yaml", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-secrets.yaml", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-service.yaml", "apps/postgres")
+                self._tpl.copy_file("apps/postgres/postgres-volume.yaml", "apps/postgres")
+                self._tpl.copy_file("makefiles/app-postgres.mk", "makefiles")
+                if self._cfg.internal_registry():
+                    # webapp
+                    self._tpl.copy_file("apps/webapp/Dockerfile", "apps/webapp")
+                    self._tpl.copy_file("apps/webapp/Makefile", "apps/webapp")
+                    self._tpl.copy_file("apps/webapp/server.py", "apps/webapp")
+                    self._tpl.copy_file("apps/webapp/webapp-replicas.yaml", "apps/webapp")
+                    self._tpl.copy_file("apps/webapp/webapp.yaml", "apps/webapp")
+                    self._tpl.copy_file("makefiles/app-webapp.mk", "makefiles")
+                # storage
+                self._tpl.copy_file("examples/storage/storage-pod.yaml", "examples/storage")
+                self._tpl.copy_file("examples/storage/storage-shared-claim.yaml", "examples/storage")
+                self._tpl.copy_file("examples/storage/storage-shared-volume.yaml", "examples/storage")
+                self._tpl.copy_file("examples/storage/storage-worker-claim.yaml", "examples/storage")
+                self._tpl.copy_file("examples/storage/storage-worker-volume.yaml", "examples/storage")
+                self._tpl.copy_file("makefiles/example-storage.mk", "makefiles")
+            if self._cfg.ingress():
+                # ingress
+                self._tpl.copy_file("examples/ingress/ingress.yaml", "examples/ingress")
+                self._tpl.copy_file("makefiles/example-ingress.mk", "makefiles")
+            if self._cfg.loadbalancer():
+                # loadbalancer
+                self._tpl.copy_file("examples/loadbalancer/loadbalancer.yaml", "examples/loadbalancer")
+                self._tpl.copy_file("makefiles/example-loadbalancer.mk", "makefiles")
+            if self._cfg.ingress() and self._cfg.loadbalancer():
+                # loadbalancer-ingress
+                self._tpl.copy_file("examples/loadbalancer-ingress/loadbalancer-ingress.yaml", "examples/loadbalancer-ingress")
+                self._tpl.copy_file("makefiles/example-loadbalancer-ingress.mk", "makefiles")
+
         return None
 
     def _get_cfg_data(self) -> dict[str, str]:
@@ -50,6 +96,7 @@ class ConfigCreate:
         data["public_https_port"] = self._cfg.public_https_port()
         data["worker_nodes"] = self._cfg.worker_nodes()
         data["mountpoints"] = self._cfg.mountpoints()
+        data["copy_examples"] = self._cfg.copy_examples()
         data["data_dir"] = self._cfg.data_dir()
         data["api_server_address"] = self._cfg.api_server_address()
 
@@ -97,6 +144,9 @@ class ClusterConfig:
 
     def mountpoints(self) -> bool:
         return self._cfg.getboolean("mountpoints", True)
+
+    def copy_examples(self) -> bool:
+        return self._cfg.getboolean("copy_examples", True)
 
     def data_dir(self) -> str:
         data_dir = self._cfg.get("data_dir", "")

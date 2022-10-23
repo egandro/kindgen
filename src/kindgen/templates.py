@@ -61,7 +61,8 @@ class Templates:
             os.makedirs(dest_file_path)
 
         src_file = os.path.join(self._tpl_path, tpl_filename)
-        dest_file = os.path.join(dest_file_path, tpl_filename)
+
+        dest_file = os.path.join(dest_file_path, os.path.basename(tpl_filename))
         dest_file = os.path.realpath(dest_file)
 
         shutil.copyfile(src_file, dest_file)

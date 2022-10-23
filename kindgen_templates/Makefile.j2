@@ -41,3 +41,6 @@ destroy: destroy-clister remove-kind-registry
 
 rebuild: destroy cluster
 
+{%if copy_examples %}
+include makefiles/*.mk
+{% endif %}
