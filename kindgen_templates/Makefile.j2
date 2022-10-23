@@ -20,7 +20,7 @@ remove-kind-registry:
 	docker rm -f "$(REGISTRY_NAME)"
 {% endif %}
 cluster-basic:
-	kind create cluster --name=$(CLUSTER_NAME) --config=./config/config.yaml{%
+	kind create cluster --name=$(CLUSTER_NAME){%
 if internal_registry %}
 	./scripts/kind-registry-connect.sh $(REGISTRY_NAME) $(REGISTRY_PORT)
 {% endif %}{%
