@@ -1,4 +1,4 @@
- {% if mountpoints -%}
+{% if mountpoints -%}
 # mointpoint
   extraMounts:
   - hostPath: {{data_dir}}/{{local_share}}
