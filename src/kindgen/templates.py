@@ -15,6 +15,23 @@ class Templates:
         tpl_dir = os.path.join(upper, "kindgen_templates")
         return tpl_dir
 
+    def get_cluster_config_file(self) -> str:
+        cfg = os.path.join(self._dest_dir, 'config')
+        cfg = os.path.join(cfg, 'cluster-configuration')
+        return cfg
+
+    def has_valid_dest_dir(self, dest_dir: Path) -> str:
+        self._dest_dir = dest_dir
+        file_path = os.path.realpath(self._dest_dir)
+
+        if not os.path.exists(file_path):
+            return f"error: directory '{file_path}' does not exists."
+
+        if not os.path.exists(self.get_cluster_config_file()):
+            return f"error: directory '{file_path}' has no file 'config/cluster-configuration'."
+
+        return ""
+
     def prepare_dest_dir(self, dest_dir: Path) -> str:
         self._dest_dir = dest_dir
         file_path = os.path.realpath(self._dest_dir)

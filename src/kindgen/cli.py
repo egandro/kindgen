@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import typer
 
-from kindgen import __app_name__, __version__, configinit, templates
+from kindgen import __app_name__, __version__, configinit, configcreate, templates
 
 app = typer.Typer()
 tpl = templates.Templates()
@@ -30,6 +30,9 @@ def init(dest_dir: str) -> None:
     help="Creates a new deployment based on an initalized directory."
 )
 def create(dest_dir: str) -> None:
+    is_valid(tpl.has_valid_dest_dir(dest_dir))
+    create = configcreate.ConfigCreate(tpl)
+    is_valid(create.create_content())
     return None
 
 def _version_callback(value: bool) -> None:
