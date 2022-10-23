@@ -1,6 +1,6 @@
 from pathlib import Path
 from os.path import dirname as up
-from jinja2 import Template
+from jinja2 import Template, Environment, FileSystemLoader
 import os
 import sys
 import shutil
@@ -51,6 +51,9 @@ class Templates:
             result = str(err)
         return result
 
+    def get_dest_dir(self) -> str:
+        return self._dest_dir
+
     def copy_file(self, tpl_filename: str, dest_sub_dir: str) -> None:
         dest_file_path = os.path.join(self._dest_dir, dest_sub_dir)
 
@@ -69,18 +72,17 @@ class Templates:
         if not os.path.exists(dest_file_path):
             os.makedirs(dest_file_path)
 
-        src_file = os.path.join(self._tpl_path, tpl_filename)
         dest_file = os.path.join(dest_file_path, dest_filename)
         dest_file = os.path.realpath(dest_file)
 
-        self._render_template(yaml_var_file, src_file, dest_file)
+        self._render_template(yaml_var_file, tpl_filename, dest_file)
 
-    def _render_template(self, cfg_data: dict[str, str], src_file: str, dest_file) -> None:
+    def _render_template(self, cfg_data: dict[str, str], tpl_filename: str, dest_file: str) -> None:
         # https://ttl255.com/jinja2-tutorial-part-1-introduction-and-variable-substitution/
         # https://stackoverflow.com/questions/69056354/access-jinja2-templates-from-a-folder-outside-of-package
-        src = Path(src_file).read_text()
 
-        tmpl = Template(src)
+        env = Environment(loader=FileSystemLoader(self._tpl_path))
+        tmpl = env.get_template(tpl_filename)
         dest = tmpl.render(cfg_data)
 
         Path(dest_file).write_text(dest)

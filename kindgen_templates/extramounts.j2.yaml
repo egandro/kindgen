@@ -1,0 +1,8 @@
+ {% if mountpoints -%}
+# mointpoint
+  extraMounts:
+  - hostPath: {{data_dir}}/{{local_share}}
+    containerPath: /mnt/data
+  - hostPath: {{data_dir}}/shared
+    containerPath: /mnt/shared
+{% endif -%}

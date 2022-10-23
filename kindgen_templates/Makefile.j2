@@ -1,0 +1,43 @@
+CLUSTER_NAME?={{cluster_name}}{%
+if internal_registry %}
+REGISTRY_NAME?={{internal_registry_name}}
+REGISTRY_PORT?={{internal_registry_port}}{%
+endif %}{%
+if ingress %}
+PUBLIC_HTTP_PORT?={{public_http_port}}
+PUBLIC_HTTPS_PORT?={{public_https_port}}{%
+endif %}
+
+cluster: {% if internal_registry %}kind-registry{% endif %} cluster-basic{% if ingress %} feature-ingress{% endif %}{% if loadbalancer %} feature-loadbalancer{% endif %}
+{% if internal_registry %}
+kind-registry:
+	./scripts/kind-registry-create.sh $(REGISTRY_NAME) $(REGISTRY_PORT)
+
+remove-kind-registry:
+	docker rm -f "$(REGISTRY_NAME)"
+{% endif %}
+cluster-basic:
+	kind create cluster --name=$(CLUSTER_NAME) --config=./config/config.yaml{%
+if internal_registry %}
+	./scripts/kind-registry-connect.sh $(REGISTRY_NAME) $(REGISTRY_PORT)
+{% endif %}{%
+if ingress %}
+# we use contour: https://kind.sigs.k8s.io/docs/user/ingress/
+feature-ingress:
+	kubectl apply -f https://projectcontour.io/quickstart/contour.yaml{% endif %}{%
+if loadbalancer %}
+# metallb https://kind.sigs.k8s.io/docs/user/loadbalancer/
+
+feature-loadbalancer:
+	kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+	./scripts/update-metallb-ipaddresspool.sh $(CLUSTER_NAME)
+{% endif %}
+
+destroy-clister:
+	kind delete cluster --name $(CLUSTER_NAME)
+	rm -f ./config/token
+
+destroy: destroy-clister remove-kind-registry
+
+rebuild: destroy cluster
+

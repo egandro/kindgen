@@ -1,8 +1,6 @@
-from os.path import dirname as up
-import os
 from configparser import ConfigParser
 from itertools import chain
-
+import os
 from subprocess import check_output
 
 from kindgen import templates
@@ -24,7 +22,8 @@ class ConfigCreate:
         return result
 
     def _render_tpl_configs(self, cfg_data: dict[str, str]) -> None:
-        self._tpl.render_template(cfg_data, "config.yaml.j2", "config", "config.yaml")
+        self._tpl.render_template(cfg_data, "config.j2.yaml", "config", "config.yaml")
+        self._tpl.render_template(cfg_data, "Makefile.j2", "", "Makefile")
         return None
 
     def _copy_configs(self) -> None:
@@ -32,7 +31,7 @@ class ConfigCreate:
         return None
 
     def _get_cfg_data(self) -> dict[str, str]:
-        self._cfg.parse()
+        self._cfg.parse(self._tpl.get_dest_dir())
 
         data = {}
 
@@ -41,6 +40,10 @@ class ConfigCreate:
         data["internal_registry_name"] = self._cfg.internal_registry_name()
         data["internal_registry_port"] = self._cfg.internal_registry_port()
         data["external_registry"] = self._cfg.external_registry()
+        data["ingress"] = self._cfg.ingress()
+        data["loadbalancer"] = self._cfg.loadbalancer()
+        data["public_http_port"] = self._cfg.public_http_port()
+        data["public_https_port"] = self._cfg.public_https_port()
         data["worker_nodes"] = self._cfg.worker_nodes()
         data["mountpoints"] = self._cfg.mountpoints()
         data["data_dir"] = self._cfg.data_dir()
@@ -54,8 +57,9 @@ class ClusterConfig:
         self._tpl = tpl
         self._cfg = ClusterConfigRaw(tpl)
 
-    def parse(self) -> None:
+    def parse(self, dest_dir:str) -> None:
         self._cfg.parse()
+        self._dest_dir = dest_dir
 
     def cluster_name(self) -> str:
         return self._cfg.get("cluster_name", "kind")
@@ -72,6 +76,18 @@ class ClusterConfig:
     def external_registry(self) -> bool:
         return self._cfg.getboolean("external_registry", False)
 
+    def ingress(self) -> bool:
+        return self._cfg.getboolean("ingress", False)
+
+    def loadbalancer(self) -> bool:
+        return self._cfg.getboolean("loadbalancer", False)
+
+    def public_http_port(self) -> int:
+        return self._cfg.getint("public_http_port", 8000)
+
+    def public_https_port(self) -> int:
+        return self._cfg.getint("public_https_port", 8443)
+
     def worker_nodes(self) -> int:
         return self._cfg.getint("worker_nodes", 0)
 
@@ -81,8 +97,7 @@ class ClusterConfig:
     def data_dir(self) -> str:
         data_dir = self._cfg.get("data_dir", "")
         if not data_dir:
-            data_dir = os.getcwd()
-            data_dir = os.path.join(data_dir, "data")
+            data_dir = os.path.join(os.path.realpath(self._dest_dir), "data")
         return data_dir
 
     def api_server_address(self) -> str:
