@@ -2,7 +2,7 @@
 dashboard-user:
 	kubectl apply -f apps/kubernetes-dashboard/admin-user.yaml
 	kubectl apply -f apps/kubernetes-dashboard/role.yaml
-	kubectl -n kubernetes-dashboard create token admin-user > token
+	kubectl -n kubernetes-dashboard create token admin-user > ./config/token
 
 # https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
 dashboard-install:
@@ -12,5 +12,5 @@ dashboard: dashboard-install dashboard-user
 
 dashboard-connect: dashboard
 	@echo open your browser at http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-	@echo token: $$(cat ./token)
+	@echo token: $$(cat ./config/token)
 	kubectl proxy
