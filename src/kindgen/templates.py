@@ -2,6 +2,7 @@ from pathlib import Path
 from os.path import dirname as up
 import os
 import shutil
+import subprocess
 
 class Templates:
     def __init__(self) -> None:
@@ -56,5 +57,28 @@ class Templates:
 
         src_file = os.path.join(self._tpl_path, tpl_filename)
         dest_file = os.path.join(dest_file_path, tpl_filename)
+        dest_file = os.path.realpath(dest_file)
 
         shutil.copyfile(src_file, dest_file)
+
+    def render_template(self, yaml_var_file: str, tpl_filename: str, dest_sub_dir: str, dest_filename: str) -> None:
+        dest_file_path = os.path.join(self._dest_dir, dest_sub_dir)
+
+        if not os.path.exists(dest_file_path):
+            os.makedirs(dest_file_path)
+
+        src_file = os.path.join(self._tpl_path, tpl_filename)
+        dest_file = os.path.join(dest_file_path, dest_filename)
+        dest_file = os.path.realpath(dest_file)
+
+        self._render_template(yaml_var_file, src_file, dest_file)
+
+    def _render_template(self, yaml_var_file: str, src_file: str, dest_file) -> None:
+        subprocess.run([
+            "emrichen",
+            "--template-format", "yaml",
+            f"--var-file={yaml_var_file}",
+            f"--output-file={dest_file}",
+            "--template-format", "yaml",
+            f"{src_file}",
+        ], capture_output=True)

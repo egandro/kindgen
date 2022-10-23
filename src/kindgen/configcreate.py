@@ -1,7 +1,11 @@
 from os.path import dirname as up
 import os
+import tempfile
+import yaml
 from configparser import ConfigParser
 from itertools import chain
+
+from subprocess import check_output
 
 from kindgen import templates
 
@@ -13,32 +17,43 @@ class ConfigCreate:
     def create_content(self) -> str:
         result = ""
         try:
-            self._cfg.parse()
+            yaml_str = self._get_var_data()
 
-            cluster_name = self._cfg.cluster_name()
-            print(f"cluster_name: {cluster_name}")
+            with tempfile.NamedTemporaryFile() as temp:
+                temp.write(yaml_str.encode())
+                temp.seek(0)
+                self._render_tpl_configs(temp.name)
 
-            internal_registry = self._cfg.internal_registry()
-            print(f"internal_registry: {internal_registry}")
+            self._copy_configs()
 
-            external_registry = self._cfg.external_registry()
-            print(f"external_registry: {external_registry}")
-
-            worker_nodes = self._cfg.worker_nodes()
-            print(f"worker_nodes: {worker_nodes}")
-
-            mountpoints = self._cfg.mountpoints()
-            print(f"mountpoints: {mountpoints}")
-
-            data_dir = self._cfg.data_dir()
-            print(f"data_dir: {data_dir}")
-
-            #self._tpl.copy_file("cluster-configuration", "config")
-            a = 1
-            a = a +1
         except Exception as err:
             result = str(err)
         return result
+
+    def _render_tpl_configs(self, yaml_var_file: str) -> None:
+        self._tpl.render_template(yaml_var_file, "config.in.yaml", "config", "config.yaml")
+        return None
+
+    def _copy_configs(self) -> None:
+        #self._tpl.copy_file("cluster-configuration", "config")
+        return None
+
+    def _get_var_data(self) -> str:
+        self._cfg.parse()
+
+        yaml_data = {}
+
+        yaml_data["cluster_name"] = self._cfg.cluster_name()
+        yaml_data["internal_registry"] = self._cfg.internal_registry()
+        yaml_data["external_registry"] = self._cfg.external_registry()
+        yaml_data["worker_nodes"] = self._cfg.worker_nodes()
+        yaml_data["mountpoints"] = self._cfg.mountpoints()
+        yaml_data["data_dir"] = self._cfg.data_dir()
+        yaml_data["api_server_address"] = self._cfg.api_server_address()
+
+        yaml_str = yaml.dump(yaml_data)
+
+        return yaml_str
 
 
 class ClusterConfig:
@@ -70,6 +85,30 @@ class ClusterConfig:
             data_dir = os.getcwd()
             data_dir = os.path.join(data_dir, "data")
         return data_dir
+
+    def api_server_address(self) -> str:
+        api_server_address = self._cfg.get("api_server_address", "")
+        if not api_server_address:
+            ip = self._get_ip(ignore_local_ips=False)
+            api_server_address = ip
+        return api_server_address
+
+    # https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-a-nic-network-interface-controller-in-python
+    def _get_ip(self, ip_addr_proto="ipv4", ignore_local_ips=True):
+        ip = ""
+        try:
+            # bash style of getting a "cool" ip address
+            # will fail on macOS / Windows / and a lot of Linux versions - help is welcome!
+            # hack works for me... go edit your files not this code...
+            ips = check_output(['hostname', '--all-ip-addresses'])
+            ips = ips.decode('ascii')
+            ip_arr = ips.split()
+            ip = ip_arr[0]
+        except Exception:
+            # bad luck...
+            pass
+        return ip
+
 
 class ClusterConfigRaw:
     def __init__(self, tpl: templates.Templates) -> None:

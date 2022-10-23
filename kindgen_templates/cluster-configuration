@@ -5,3 +5,6 @@ worker_nodes=3
 mountpoints=true
 # default is $(PWD)/data
 data_dir=
+# default is main IP of the host
+# set back to 127.0.0.1 if you don't want this
+api_server_address=

@@ -81,6 +81,7 @@ setup(
 
     data_files=[("kindgen_templates", [
             "kindgen_templates/cluster-configuration"
+            "kindgen_templates/config.in.yaml"
         ]
     )],  # Optional
     entry_points={  # Optional
