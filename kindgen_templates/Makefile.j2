@@ -8,6 +8,9 @@ PUBLIC_HTTP_PORT?={{public_http_port}}
 PUBLIC_HTTPS_PORT?={{public_https_port}}{%
 endif %}
 
+# you might wan this
+# export KUBECONFIG=./config/config
+
 cluster: {% if internal_registry %}kind-registry{% endif %} cluster-basic{% if ingress %} feature-ingress{% endif %}{% if loadbalancer %} feature-loadbalancer{% endif %}
 {% if internal_registry %}
 kind-registry:
@@ -35,9 +38,9 @@ feature-loadbalancer:
 
 destroy-clister:
 	kind delete cluster --name $(CLUSTER_NAME)
-	rm -f ./config/token
+	rm -f ./config/token ./config/config
 
-destroy: destroy-clister remove-kind-registry
+destroy: destroy-clister {% if internal_registry %}remove-kind-registry{% endif %}
 
 rebuild: destroy cluster
 

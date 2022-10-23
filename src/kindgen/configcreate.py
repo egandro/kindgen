@@ -24,6 +24,8 @@ class ConfigCreate:
     def _render_tpl_configs(self, cfg_data: dict[str, str]) -> None:
         self._tpl.render_template(cfg_data, "config.j2.yaml", "config", "config.yaml")
         self._tpl.render_template(cfg_data, "Makefile.j2", "", "Makefile")
+        if self._cfg.internal_registry():
+            self._tpl.render_template(cfg_data, "localregistry.j2.yaml", "config", "localregistry.yaml")
         return None
 
     def _copy_configs(self) -> None:
