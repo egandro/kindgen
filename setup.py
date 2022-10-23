@@ -80,7 +80,7 @@ setup(
     #data_files=[("my_data", ["data/data_file"])],  # Optional
     entry_points={  # Optional
         "console_scripts": [
-            "kindgen=kindgen:main", # we want to have __main__.py here
+            "kindgen=kindgen.__main__:main"
         ],
     },
     project_urls={  # Optional
