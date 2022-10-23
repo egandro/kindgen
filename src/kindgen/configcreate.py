@@ -89,7 +89,6 @@ class ConfigCreate:
         data["internal_registry"] = self._cfg.internal_registry()
         data["internal_registry_name"] = self._cfg.internal_registry_name()
         data["internal_registry_port"] = self._cfg.internal_registry_port()
-        data["external_registry"] = self._cfg.external_registry()
         data["ingress"] = self._cfg.ingress()
         data["loadbalancer"] = self._cfg.loadbalancer()
         data["public_http_port"] = self._cfg.public_http_port()
@@ -122,10 +121,7 @@ class ClusterConfig:
         return self._cfg.get("internal_registry_name", "kind-registry")
 
     def internal_registry_port(self) -> int:
-        return self._cfg.getint("internal_registry_port", 5001)
-
-    def external_registry(self) -> bool:
-        return self._cfg.getboolean("external_registry", False)
+        return self._cfg.getint("internal_registry_port", 5001)x
 
     def ingress(self) -> bool:
         return self._cfg.getboolean("ingress", False)
