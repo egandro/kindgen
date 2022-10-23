@@ -66,7 +66,7 @@ setup(
     packages=find_packages(where="src"),  # Required
     python_requires=">=3.7, <4",
     install_requires=[
-        "emrichen"
+        "Jinja2"
     ],
     extras_require={  # Optional
         "dev": ["check-manifest"],

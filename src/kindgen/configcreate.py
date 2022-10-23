@@ -1,7 +1,5 @@
 from os.path import dirname as up
 import os
-import tempfile
-import yaml
 from configparser import ConfigParser
 from itertools import chain
 
@@ -17,43 +15,36 @@ class ConfigCreate:
     def create_content(self) -> str:
         result = ""
         try:
-            yaml_str = self._get_var_data()
-
-            with tempfile.NamedTemporaryFile() as temp:
-                temp.write(yaml_str.encode())
-                temp.seek(0)
-                self._render_tpl_configs(temp.name)
-
+            cfg_data = self._get_cfg_data()
+            self._render_tpl_configs(cfg_data)
             self._copy_configs()
 
         except Exception as err:
             result = str(err)
         return result
 
-    def _render_tpl_configs(self, yaml_var_file: str) -> None:
-        self._tpl.render_template(yaml_var_file, "config.in.yaml", "config", "config.yaml")
+    def _render_tpl_configs(self, cfg_data: dict[str, str]) -> None:
+        self._tpl.render_template(cfg_data, "config.yaml.j2", "config", "config.yaml")
         return None
 
     def _copy_configs(self) -> None:
         #self._tpl.copy_file("cluster-configuration", "config")
         return None
 
-    def _get_var_data(self) -> str:
+    def _get_cfg_data(self) -> dict[str, str]:
         self._cfg.parse()
 
-        yaml_data = {}
+        data = {}
 
-        yaml_data["cluster_name"] = self._cfg.cluster_name()
-        yaml_data["internal_registry"] = self._cfg.internal_registry()
-        yaml_data["external_registry"] = self._cfg.external_registry()
-        yaml_data["worker_nodes"] = self._cfg.worker_nodes()
-        yaml_data["mountpoints"] = self._cfg.mountpoints()
-        yaml_data["data_dir"] = self._cfg.data_dir()
-        yaml_data["api_server_address"] = self._cfg.api_server_address()
+        data["cluster_name"] = self._cfg.cluster_name()
+        data["internal_registry"] = self._cfg.internal_registry()
+        data["external_registry"] = self._cfg.external_registry()
+        data["worker_nodes"] = self._cfg.worker_nodes()
+        data["mountpoints"] = self._cfg.mountpoints()
+        data["data_dir"] = self._cfg.data_dir()
+        data["api_server_address"] = self._cfg.api_server_address()
 
-        yaml_str = yaml.dump(yaml_data)
-
-        return yaml_str
+        return data
 
 
 class ClusterConfig:

@@ -1,6 +1,8 @@
 from pathlib import Path
 from os.path import dirname as up
+from jinja2 import Template
 import os
+import sys
 import shutil
 import subprocess
 
@@ -73,12 +75,12 @@ class Templates:
 
         self._render_template(yaml_var_file, src_file, dest_file)
 
-    def _render_template(self, yaml_var_file: str, src_file: str, dest_file) -> None:
-        subprocess.run([
-            "emrichen",
-            "--template-format", "yaml",
-            f"--var-file={yaml_var_file}",
-            f"--output-file={dest_file}",
-            "--template-format", "yaml",
-            f"{src_file}",
-        ], capture_output=True)
+    def _render_template(self, cfg_data: dict[str, str], src_file: str, dest_file) -> None:
+        # https://ttl255.com/jinja2-tutorial-part-1-introduction-and-variable-substitution/
+
+        src = Path(src_file).read_text()
+
+        tmpl = Template(src)
+        dest = tmpl.render(cfg_data)
+
+        Path(dest_file).write_text(dest)
