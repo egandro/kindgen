@@ -54,7 +54,7 @@ class Templates:
     def get_dest_dir(self) -> str:
         return self._dest_dir
 
-    def copy_file(self, tpl_filename: str, dest_sub_dir: str) -> None:
+    def copy_file(self, tpl_filename: str, dest_sub_dir: str, mode: any=None) -> None:
         dest_file_path = os.path.join(self._dest_dir, dest_sub_dir)
 
         if not os.path.exists(dest_file_path):
@@ -65,6 +65,13 @@ class Templates:
         dest_file = os.path.realpath(dest_file)
 
         shutil.copyfile(src_file, dest_file)
+
+        if mode:
+            try:
+                Path(dest_file).chmod(mode)
+            except Exception:
+                # Windows friends
+                pass
 
     def render_template(self, yaml_var_file: str, tpl_filename: str, dest_sub_dir: str, dest_filename: str) -> None:
         dest_file_path = os.path.join(self._dest_dir, dest_sub_dir)

@@ -27,7 +27,11 @@ class ConfigCreate:
         return None
 
     def _copy_configs(self) -> None:
-        #self._tpl.copy_file("cluster-configuration", "config")
+        if self._cfg.internal_registry():
+            self._tpl.copy_file("kind-registry-connect.sh", "scripts", 0o0755)
+            self._tpl.copy_file("kind-registry-create.sh", "scripts", 0o0755)
+        if self._cfg.loadbalancer():
+            self._tpl.copy_file("update-metallb-ipaddresspool.sh", "scripts", 0o0755)
         return None
 
     def _get_cfg_data(self) -> dict[str, str]:
