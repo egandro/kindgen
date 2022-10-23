@@ -5,14 +5,28 @@ from typing import List, Optional
 
 import typer
 
-from kindgen import __app_name__, __version__
+from kindgen import __app_name__, __version__, configinit, templates
 
 app = typer.Typer()
+tpl = templates.Templates()
 
 @app.command(
     help="Creates a directory with configuration file."
 )
-def init() -> None:
+def init(dest_dir: str) -> None:
+    init = configinit.ConfigInit(tpl.get_tpl_path(), dest_dir)
+    error = init.prepare_dest_dir()
+    if error:
+        typer.secho(
+            f'{error}', fg=typer.colors.RED
+        )
+        raise typer.Exit(1)
+    error = init.create_content()
+    if error:
+        typer.secho(
+            f'{error}', fg=typer.colors.RED
+        )
+        raise typer.Exit(1)
     return None
 
 @app.command(

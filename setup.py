@@ -65,7 +65,9 @@ setup(
     #
     packages=find_packages(where="src"),  # Required
     python_requires=">=3.7, <4",
-    install_requires=["emrichen"],  # Optional
+    install_requires=[
+        "emrichen"
+    ],
     extras_require={  # Optional
         "dev": ["check-manifest"],
         "test": ["coverage"],
@@ -77,7 +79,10 @@ setup(
     #    "sample": ["package_data.dat"],
     #},
 
-    #data_files=[("my_data", ["data/data_file"])],  # Optional
+    data_files=[("kindgen_templates", [
+            "kindgen_templates/cluster-configuration"
+        ]
+    )],  # Optional
     entry_points={  # Optional
         "console_scripts": [
             "kindgen=kindgen.__main__:main"
