@@ -10,29 +10,26 @@ from kindgen import __app_name__, __version__, configinit, templates
 app = typer.Typer()
 tpl = templates.Templates()
 
+def is_valid(error: str) -> None:
+    if error:
+        typer.secho(
+            f'{error}', fg=typer.colors.RED
+        )
+        raise typer.Exit(1)
+
 @app.command(
     help="Creates a directory with configuration file."
 )
 def init(dest_dir: str) -> None:
-    init = configinit.ConfigInit(tpl.get_tpl_path(), dest_dir)
-    error = init.prepare_dest_dir()
-    if error:
-        typer.secho(
-            f'{error}', fg=typer.colors.RED
-        )
-        raise typer.Exit(1)
-    error = init.create_content()
-    if error:
-        typer.secho(
-            f'{error}', fg=typer.colors.RED
-        )
-        raise typer.Exit(1)
+    is_valid(tpl.prepare_dest_dir(dest_dir))
+    init = configinit.ConfigInit(tpl)
+    is_valid(init.create_content())
     return None
 
 @app.command(
     help="Creates a new deployment based on an initalized directory."
 )
-def create() -> None:
+def create(dest_dir: str) -> None:
     return None
 
 def _version_callback(value: bool) -> None:
