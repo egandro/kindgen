@@ -1,6 +1,3 @@
-from os.path import dirname as up
-import os
-
 from kindgen import templates
 
 class ConfigInit:

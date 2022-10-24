@@ -1,10 +1,7 @@
 from pathlib import Path
-from os.path import dirname as up
-from jinja2 import Template, Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 import os
-import sys
 import shutil
-import subprocess
 
 class Templates:
     def __init__(self) -> None:
