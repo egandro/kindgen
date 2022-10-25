@@ -1,1 +1,39 @@
 # idea https://github.com/kubernetes-sigs/kind/issues/2976
+
+cluster_name=kind
+internal_registry=true
+internal_registry_name=kind-registry
+internal_registry_port=5001
+external_registry=true
+external_registry_config=.$HOME/.secret_registry/config.json
+ingress=true
+ingress_http_port=8000
+ingress_https_port=8443
+loadbalancer=true
+worker_nodes=3
+mountpoints=true
+# default is $(Kindfile_dir)/.kind/data
+mount_dir=
+copy_examples=true
+# default is $(Kindfile_dir)/.kind/config
+config_dir=
+# installs the dashbard and creates a token file to `config_dir`/token
+dashboard=true
+# default is main IP of the host
+# set back to 127.0.0.1 if you don't want this
+api_server_address=
+
+# -------------------------------------------------------------------
+# Workflow
+# $ kindtool init # creates a new Kindfile
+# $ kindtool up
+# $ kindtool halt
+# $ kindtool destroy
+# # kick the datafolder (needs to run as root as the docker might created 0:0 uid/gid files)
+# $ sudo kindtool delete-data
+# # is kind running?
+# $ kindtool status
+# # returns the directory with the config files - can be used as export KUBECONFIG=$(kindfile get kubeconfig)
+# $ kindtool get kubeconfig
+# # returns the ingress_http_port port
+# $ kindtool get ingress_http_port
